@@ -1,0 +1,10 @@
+
+body {
+  font-family: 'Amatic SC';
+  margin: 0;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
