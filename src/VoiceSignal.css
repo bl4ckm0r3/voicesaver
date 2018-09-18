@@ -1,0 +1,19 @@
+.circle {
+  border: 1px solid black;
+  display: block;
+  position: absolute;
+  top: 50px;
+  right: 150px;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  transition: background-color .3s;
+}
+
+.circle.red {
+  background-color: red;
+}
+
+.circle.gray {
+  background-color: gray;
+}

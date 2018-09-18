@@ -5,6 +5,7 @@ import WordList from "./WordList";
 import FullscreenBG from "./FullscreenBG";
 import Timings from "./Timings";
 import nlp from "compromise";
+import VoiceSignal from "./VoiceSignal";
 
 function throttle(fn, delay = 4000) {
   let lastCall = 0;
@@ -48,7 +49,11 @@ class App extends Component {
     // https://www.googleapis.com/customsearch/v1?q=${word}+background&searchType=image&imgSize=huge&imgType=photo&cx=`${process.env.REACT_APP_APP_ID}`;
     const url = `https://pixabay.com/api/?key=${
       process.env.REACT_APP_APP_ID
-    }&q=${word}&orientation=horizontal&category=background&safesearch=true&image_type=photo&pretty=false`;
+    }&q=${word
+      .split(" ")
+      .join(
+        "+"
+      )}&orientation=horizontal&category=background&safesearch=true&image_type=photo&pretty=false`;
     const response = await fetch(url);
     console.log(response);
     const remainingHits = response.headers.get("X-RateLimit-Remaining");
@@ -70,6 +75,21 @@ class App extends Component {
       });
     }
   });
+  onspeechstart = () => {
+    this.setState({
+      speechStarted: true
+    });
+  };
+  onspeechend = () => {
+    this.setState({
+      speechStarted: false
+    });
+  };
+  onspeecherror = () => {
+    this.setState({
+      speechStarted: false
+    });
+  };
 
   render() {
     this.updateImage();
@@ -78,7 +98,12 @@ class App extends Component {
         <FullscreenBG src={this.state.image} />
         <Timings timings={this.state.timings} />
         <WordList words={this.state.words} />
-        <Voice onresult={this.onWordRecognised} />
+        <Voice
+          onresult={this.onWordRecognised}
+          onspeechstart={this.onspeechstart}
+          onerror={this.onerror}
+        />
+        <VoiceSignal speechStarted={this.state.speechStarted} />
       </Fragment>
     );
   }
