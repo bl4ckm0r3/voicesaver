@@ -49,8 +49,8 @@ class FullscreenBG extends Component {
     }`;
     return (
       <div className="cover">
-        <img src={this.state.images.fg} className={foreground} />
-        <img src={this.state.images.bg} className={background} />
+        <img src={this.state.images.fg} alt="Foreground" className={foreground} />
+        <img src={this.state.images.bg} alt="Background" className={background} />
       </div>
     );
   }

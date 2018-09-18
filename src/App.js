@@ -3,7 +3,8 @@ import "./App.css";
 import Voice from "./Voice";
 import WordList from "./WordList";
 import FullscreenBG from "./FullscreenBG";
-import Timings from './Timings';
+import Timings from "./Timings";
+import nlp from "compromise";
 
 function throttle(fn, delay = 4000) {
   let lastCall = 0;
@@ -22,8 +23,8 @@ class App extends Component {
     image: null,
     words: [],
     timings: {
-      remainingHits: 2500,
-      totalHitsPer30Minutes: 2500
+      remainingHits: null, // 2500
+      totalHitsPer30Minutes: null // 2500
     }
   };
 
@@ -36,38 +37,37 @@ class App extends Component {
   };
 
   updateImage = throttle(async (transcript = "") => {
-    const sentence = transcript.split(" ").filter(a => a.length > 4);
-    // console.log(sentence);
-    if (sentence.length > 0) {
-      const word = sentence[Math.floor(Math.random() * sentence.length)];
-      if (this.state.words.includes(word)) {
-        return;
-      }
-      //`https://api.unsplash.com/photos/?client_id=${process.env.REACT_APP_APP_ID}&query=${word}`
-      // https://www.googleapis.com/customsearch/v1?q=${word}+background&searchType=image&imgSize=huge&imgType=photo&cx=`${process.env.REACT_APP_APP_ID}`;
-      const url = `https://pixabay.com/api/?key=${
-        process.env.REACT_APP_APP_ID
-      }&q=${word}&orientation=horizontal&category=background&safesearch=true&image_type=photo&pretty=false`;
-      const response = await fetch(url);
-      console.log(response);
-      const remainingHits = response.headers.get('X-RateLimit-Remaining');
-      const totalHitsPer30Minutes = response.headers.get('X-RateLimit-Limit');
+    const [word] = nlp(transcript)
+      .nouns()
+      .offset()
+      .map(e => e.text);
+    if (!word || this.state.words.includes(word)) {
+      return;
+    }
+    //`https://api.unsplash.com/photos/?client_id=${process.env.REACT_APP_APP_ID}&query=${word}`
+    // https://www.googleapis.com/customsearch/v1?q=${word}+background&searchType=image&imgSize=huge&imgType=photo&cx=`${process.env.REACT_APP_APP_ID}`;
+    const url = `https://pixabay.com/api/?key=${
+      process.env.REACT_APP_APP_ID
+    }&q=${word}&orientation=horizontal&category=background&safesearch=true&image_type=photo&pretty=false`;
+    const response = await fetch(url);
+    console.log(response);
+    const remainingHits = response.headers.get("X-RateLimit-Remaining");
+    const totalHitsPer30Minutes = response.headers.get("X-RateLimit-Limit");
 
-      const { hits: results } = await response.json();
-      if (results.length > 0) {
-        console.log(sentence, word, results);
-        const { largeImageURL: image } = results[
-          Math.floor(Math.random() * results.length)
-        ];
-        this.setState({
-          timings: {
-            remainingHits,
-            totalHitsPer30Minutes
-          },
-          image,
-          words: [word, ...this.state.words]
-        });
-      }
+    const { hits: results } = await response.json();
+    if (results.length > 0) {
+      console.log(word, results);
+      const { largeImageURL: image } = results[
+        Math.floor(Math.random() * results.length)
+      ];
+      this.setState({
+        timings: {
+          remainingHits,
+          totalHitsPer30Minutes
+        },
+        image,
+        words: [word, ...this.state.words]
+      });
     }
   });
 
