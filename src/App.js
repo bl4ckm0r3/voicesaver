@@ -6,18 +6,7 @@ import FullscreenBG from "./FullscreenBG";
 import Timings from "./Timings";
 import nlp from "compromise";
 import VoiceSignal from "./VoiceSignal";
-
-function throttle(fn, delay = 4000) {
-  let lastCall = 0;
-  return (...args) => {
-    const now = new Date().getTime();
-    if (now - lastCall < delay) {
-      return;
-    }
-    lastCall = now;
-    return fn(...args);
-  };
-}
+import { throttle } from './util';
 
 class App extends Component {
   state = {
@@ -38,30 +27,25 @@ class App extends Component {
   };
 
   updateImage = throttle(async (transcript = "") => {
-    const [word] = nlp(transcript)
+    const [word = transcript] = nlp(transcript)
       .nouns()
       .offset()
       .map(e => e.text);
     if (!word || this.state.words.includes(word)) {
+      console.log('no word or word already present', word, transcript);
       return;
     }
-    //`https://api.unsplash.com/photos/?client_id=${process.env.REACT_APP_APP_ID}&query=${word}`
-    // https://www.googleapis.com/customsearch/v1?q=${word}+background&searchType=image&imgSize=huge&imgType=photo&cx=`${process.env.REACT_APP_APP_ID}`;
+    const query = word.split(" ").join("+");
     const url = `https://pixabay.com/api/?key=${
       process.env.REACT_APP_APP_ID
-    }&q=${word
-      .split(" ")
-      .join(
-        "+"
-      )}&orientation=horizontal&category=background&safesearch=true&image_type=photo&pretty=false`;
+    }&q=${query}&orientation=horizontal&category=background&safesearch=true&image_type=photo&pretty=false`;
     const response = await fetch(url);
-    console.log(response);
     const remainingHits = response.headers.get("X-RateLimit-Remaining");
     const totalHitsPer30Minutes = response.headers.get("X-RateLimit-Limit");
 
     const { hits: results } = await response.json();
     if (results.length > 0) {
-      console.log(word, results);
+      //console.log(word, results);
       const { largeImageURL: image } = results[
         Math.floor(Math.random() * results.length)
       ];
@@ -101,6 +85,7 @@ class App extends Component {
         <Voice
           onresult={this.onWordRecognised}
           onspeechstart={this.onspeechstart}
+          onspeechend={this.onspeechend}
           onerror={this.onerror}
         />
         <VoiceSignal speechStarted={this.state.speechStarted} />

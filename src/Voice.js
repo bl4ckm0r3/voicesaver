@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -26,11 +26,11 @@ class Voice extends Component {
     };
     this.speech.onspeechend = () => {
       console.log("on speech end");
-      setTimeout(this.restart, 1000);
+      this.restart();
       this.props.onspeechend();
     };
-    this.speech.onerror = () => {
-      console.log("on error");
+    this.speech.onerror = (e) => {
+      console.log("on error", e);
       this.restart();
       this.props.onerror();
     };
@@ -40,14 +40,17 @@ class Voice extends Component {
     this.speech.start();
   };
 
-  restart = async () => {
-    try {
-      await this.speech.stop();
-      await this.speech.abort();
-      await this.speech.start();
-    } catch (e) {
-      console.log(e.message);
-    }
+  restart = () => {
+    this.speech.stop();
+    this.speech.abort();
+    setTimeout(() => {
+      try {
+        this.speech.start();
+      } catch (e) {
+        console.log(e.message);
+        this.restart();
+      }
+    }, 100);
   };
 
   componentWillUnmount() {
