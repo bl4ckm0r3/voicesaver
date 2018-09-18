@@ -30,11 +30,9 @@ class FullscreenBG extends Component {
       });
     };
     img.src = src;
-    this.img = img;
   };
 
   shouldComponentUpdate(nextProps) {
-    console.log(nextProps);
     if (this.props.src !== nextProps.src) {
       this.preloadImage(nextProps.src);
       return false;

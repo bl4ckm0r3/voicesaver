@@ -19,7 +19,6 @@ class Voice extends Component {
     };
     this.speech.onerror = () => {
       console.log("on error");
-      this.speech.abort();
       this.restart();
     };
     this.speech.continuous = true;

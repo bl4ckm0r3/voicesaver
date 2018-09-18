@@ -1,5 +1,5 @@
 ul {
-  font-family: 'Graphik', 'Avenir', 'sans-serif';
+  font-family: 'Graphik', 'Avenir', 'Arial';
   font-size: 100px;
   height: 80vh;
   position: absolute;
@@ -33,13 +33,13 @@ li:hover {
   opacity: 1
 }
 
-.slideUp-enter {
-  opacity: 0.01;
+.slide-right-enter {
+  opacity: 0;
   margin-left: -20px;
 }
 
-.slideUp-enter-done {
+.slide-right-enter-done {
   opacity: 1;
   margin-left: 0;
-  transition: .1s;
+  transition: .2s;
 }

@@ -3,6 +3,7 @@ import "./App.css";
 import Voice from "./Voice";
 import WordList from "./WordList";
 import FullscreenBG from "./FullscreenBG";
+import Timings from './Timings';
 
 function throttle(fn, delay = 4000) {
   let lastCall = 0;
@@ -19,7 +20,11 @@ function throttle(fn, delay = 4000) {
 class App extends Component {
   state = {
     image: null,
-    words: []
+    words: [],
+    timings: {
+      remainingHits: 2500,
+      totalHitsPer30Minutes: 2500
+    }
   };
 
   onWordRecognised = evt => {
@@ -45,6 +50,9 @@ class App extends Component {
       }&q=${word}&orientation=horizontal&category=background&safesearch=true&image_type=photo&pretty=false`;
       const response = await fetch(url);
       console.log(response);
+      const remainingHits = response.headers.get('X-RateLimit-Remaining');
+      const totalHitsPer30Minutes = response.headers.get('X-RateLimit-Limit');
+
       const { hits: results } = await response.json();
       if (results.length > 0) {
         console.log(sentence, word, results);
@@ -52,6 +60,10 @@ class App extends Component {
           Math.floor(Math.random() * results.length)
         ];
         this.setState({
+          timings: {
+            remainingHits,
+            totalHitsPer30Minutes
+          },
           image,
           words: [word, ...this.state.words]
         });
@@ -64,6 +76,7 @@ class App extends Component {
     return (
       <Fragment>
         <FullscreenBG src={this.state.image} />
+        <Timings timings={this.state.timings} />
         <WordList words={this.state.words} />
         <Voice onresult={this.onWordRecognised} />
       </Fragment>

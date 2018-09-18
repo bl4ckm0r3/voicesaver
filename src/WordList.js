@@ -14,7 +14,7 @@ class WordList extends Component {
           {this.props.words
             .map((w, i) => {
               return (
-                <CSSTransition key={w} timeout={500} classNames="slideUp">
+                <CSSTransition key={w} timeout={500} classNames="slide-right">
                   <li key={i}>{w.toUpperCase()}</li>
                 </CSSTransition>
               );
